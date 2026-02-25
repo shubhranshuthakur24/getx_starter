@@ -13,6 +13,7 @@ A production-ready Flutter starter project using **GetX** for state management a
 5. [Environment Setup (Credentials)](#environment-setup-credentials)
 6. [How to Run](#how-to-run)
 7. [Adding a New Screen — Step-by-Step Guide](#adding-a-new-screen--step-by-step-guide)
+8. [Testing Guide](#testing-guide)
 
 ---
 
@@ -431,3 +432,378 @@ Get.offAllNamed(AppRoutes.profile);
 | Route entry | `routes/app_pages.dart` | **Edit** — add `GetPage` |
 
 > 💡 **Tip:** For simple screens that don't call any API or business logic (e.g. a static "About" page), you can skip Steps 1 & 2 entirely and create just the page + binding + route entry (Steps 4–6), with the controller holding only UI state.
+
+---
+
+## Testing Guide
+
+This project uses **three layers of testing** that mirror the clean architecture layers.  
+All tests live under `test/` and use [`mockito`](https://pub.dev/packages/mockito) for mocking.
+
+---
+
+### Test Folder Structure
+
+```
+test/
+├── mocks/
+│   ├── mocks.dart          ← declare @GenerateMocks here
+│   └── mocks.mocks.dart    ← auto-generated (never edit by hand)
+│
+├── unit/
+│   ├── domain/
+│   │   └── usecases/
+│   │       ├── login_usecase_test.dart
+│   │       └── register_usecase_test.dart
+│   ├── data/
+│   │   └── repositories/
+│   │       └── auth_repository_impl_test.dart
+│   └── presentation/
+│       └── controllers/
+│           ├── login_controller_test.dart
+│           └── register_controller_test.dart
+│
+└── widget/
+    ├── login_page_test.dart
+    ├── register_page_test.dart
+    └── home_page_test.dart
+```
+
+| Folder | What it tests |
+|---|---|
+| `unit/domain/usecases/` | Use cases delegate correctly to repository, `Either` results pass through unchanged |
+| `unit/data/repositories/` | Repository maps Firebase exceptions to typed `Failure`s, handles null users |
+| `unit/presentation/controllers/` | Validators, observable state, business logic (no widget tree needed) |
+| `widget/` | Pages render correctly, forms validate, interactions trigger the right state changes |
+
+---
+
+### Running Tests
+
+```bash
+# Run all unit tests
+flutter test test/unit/
+
+# Run all widget tests
+flutter test test/widget/
+
+# Run everything
+flutter test test/unit/ test/widget/
+
+# Run a single test file
+flutter test test/unit/domain/usecases/login_usecase_test.dart
+
+# Run only tests whose name contains a keyword
+flutter test test/unit/ --name "validateEmail"
+
+# Run with verbose output (see each test name as it runs)
+flutter test test/unit/ test/widget/ --reporter expanded
+```
+
+---
+
+### How Mocking Works
+
+This project uses **mockito with code generation**. The workflow is:
+
+```
+mocks/mocks.dart          ← you declare which classes to mock
+        │
+        │  flutter pub run build_runner build
+        ▼
+mocks/mocks.mocks.dart    ← generated mock classes (MockLoginUseCase, etc.)
+        │
+        │  imported by test files
+        ▼
+test files                ← use mock classes in setUp/tests
+```
+
+#### Step 1 — Declare the mock in `test/mocks/mocks.dart`
+
+Open `test/mocks/mocks.dart` and add your class to the `@GenerateMocks` list:
+
+```dart
+// test/mocks/mocks.dart
+@GenerateMocks([
+  AuthRepository,
+  AuthRemoteDataSource,
+  LoginUseCase,
+  RegisterUseCase,
+  UserCredential,
+  User,
+  YourNewClass,    // ← add yours here
+])
+void main() {}
+```
+
+Make sure you also add the corresponding `import` at the top of the file.
+
+#### Step 2 — Regenerate the mock file
+
+```bash
+flutter pub run build_runner build --delete-conflicting-outputs
+```
+
+This creates/updates `test/mocks/mocks.mocks.dart` with a `MockYourNewClass` class you can use in tests.
+
+> ⚠️ **Always re-run build_runner** after changing `mocks.dart` or the mock file will be out of date.
+
+#### Step 3 — Use the mock in your test
+
+```dart
+import '../../mocks/mocks.mocks.dart';   // adjust path depth as needed
+
+late MockYourNewClass mockYourClass;
+
+setUp(() {
+  mockYourClass = MockYourNewClass();
+});
+
+test('does the right thing', () {
+  // Arrange — define what the mock returns
+  when(mockYourClass.doSomething(any)).thenReturn('fake value');
+
+  // Act
+  final result = mockYourClass.doSomething('input');
+
+  // Assert
+  expect(result, 'fake value');
+  verify(mockYourClass.doSomething('input')).called(1);
+});
+```
+
+**Common mockito matchers:**
+
+| Matcher | Meaning |
+|---|---|
+| `any` | Accept any argument of the correct type |
+| `anyNamed('x')` | Accept any value for a named parameter `x` |
+| `argThat(predicate)` | Accept arguments matching a custom condition |
+
+**Common mockito stubbing:**
+
+```dart
+// Synchronous return
+when(mock.method(any)).thenReturn('value');
+
+// Async return
+when(mock.method(any)).thenAnswer((_) async => 'value');
+
+// Throw an exception
+when(mock.method(any)).thenThrow(Exception('boom'));
+
+// Return Either<Failure, T> (dartz)
+when(mock.method(any)).thenAnswer((_) async => right(someValue));
+when(mock.method(any)).thenAnswer((_) async => left(AuthFailure('msg')));
+```
+
+---
+
+### Adding a New Test — Step-by-Step
+
+This walkthrough adds tests for a hypothetical `GetProfileUseCase` and its controller.
+
+---
+
+#### Step 1 — Declare mock (if new class needing mocking)
+
+If your new class (`GetProfileUseCase`) is not yet mocked, add it:
+
+```dart
+// test/mocks/mocks.dart
+@GenerateMocks([
+  ...existing...,
+  GetProfileUseCase,   // ← add
+])
+void main() {}
+```
+
+Then regenerate:
+```bash
+flutter pub run build_runner build --delete-conflicting-outputs
+```
+
+---
+
+#### Step 2 — Write the use case unit test
+
+Create `test/unit/domain/usecases/get_profile_usecase_test.dart`:
+
+```dart
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
+import 'package:getx_starter/domain/entities/user_entity.dart';
+import 'package:getx_starter/domain/usecases/get_profile_usecase.dart';
+
+import '../../../mocks/mocks.mocks.dart'; // adjust depth: test/unit/domain/usecases/ → 3 levels
+
+void main() {
+  late GetProfileUseCase sut;
+  late MockAuthRepository mockRepository;
+
+  setUp(() {
+    mockRepository = MockAuthRepository();
+    sut = GetProfileUseCase(mockRepository);
+  });
+
+  group('GetProfileUseCase', () {
+    test('returns user when one is signed in', () {
+      // Arrange — set up mock data
+      const fakeUser = UserEntity(uid: 'uid-123', email: 'user@test.com');
+      when(mockRepository.getCurrentUser()).thenReturn(fakeUser);
+
+      // Act
+      final result = sut();
+
+      // Assert
+      expect(result, fakeUser);
+      verify(mockRepository.getCurrentUser()).called(1);
+    });
+
+    test('returns null when no user is signed in', () {
+      when(mockRepository.getCurrentUser()).thenReturn(null);
+
+      final result = sut();
+
+      expect(result, isNull);
+    });
+  });
+}
+```
+
+---
+
+#### Step 3 — Write the controller unit test
+
+Create `test/unit/presentation/controllers/profile_controller_test.dart`:
+
+```dart
+import 'package:flutter_test/flutter_test.dart';
+import 'package:get/get.dart';
+import 'package:mockito/mockito.dart';
+import 'package:getx_starter/domain/entities/user_entity.dart';
+import 'package:getx_starter/presentation/controllers/profile_controller.dart';
+
+import '../../../../mocks/mocks.mocks.dart'; // 4 levels deep
+
+void main() {
+  late ProfileController sut;
+  late MockGetProfileUseCase mockUseCase;
+
+  setUp(() {
+    mockUseCase = MockGetProfileUseCase();
+    sut = ProfileController(mockUseCase);
+    Get.testMode = true;
+  });
+
+  tearDown(() {
+    sut.onClose();
+    Get.reset();
+  });
+
+  test('loads user into observable on init', () {
+    const fakeUser = UserEntity(uid: 'uid-123', email: 'user@test.com');
+    when(mockUseCase()).thenReturn(fakeUser);
+
+    sut.onInit(); // triggers the usecase call
+
+    expect(sut.user.value, fakeUser);
+  });
+
+  test('user is null when not signed in', () {
+    when(mockUseCase()).thenReturn(null);
+
+    sut.onInit();
+
+    expect(sut.user.value, isNull);
+  });
+}
+```
+
+---
+
+#### Step 4 — Write the widget test
+
+Create `test/widget/profile_page_test.dart`:
+
+```dart
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:get/get.dart';
+import 'package:mockito/mockito.dart';
+import 'package:getx_starter/domain/entities/user_entity.dart';
+import 'package:getx_starter/presentation/controllers/profile_controller.dart';
+import 'package:getx_starter/presentation/pages/profile/profile_page.dart';
+
+import '../mocks/mocks.mocks.dart'; // 1 level deep from test/widget/
+
+void main() {
+  late MockGetProfileUseCase mockUseCase;
+  late ProfileController controller;
+
+  setUp(() {
+    mockUseCase = MockGetProfileUseCase();
+    controller = ProfileController(mockUseCase);
+  });
+
+  tearDown(() => Get.reset());
+
+  testWidgets('displays user email when signed in', (tester) async {
+    // Arrange — fake data the use case will return
+    const fakeUser = UserEntity(uid: 'uid-123', email: 'user@test.com');
+    when(mockUseCase()).thenReturn(fakeUser);
+
+    // Put controller into GetX before pumpWidget
+    Get.put<ProfileController>(controller);
+    controller.onInit();
+
+    // Act
+    await tester.pumpWidget(const GetMaterialApp(home: ProfilePage()));
+    await tester.pump();
+
+    // Assert
+    expect(find.text('Email: user@test.com'), findsOneWidget);
+  });
+
+  testWidgets('displays fallback when not signed in', (tester) async {
+    when(mockUseCase()).thenReturn(null);
+
+    Get.put<ProfileController>(controller);
+    controller.onInit();
+
+    await tester.pumpWidget(const GetMaterialApp(home: ProfilePage()));
+    await tester.pump();
+
+    expect(find.text('Not logged in'), findsOneWidget);
+  });
+}
+```
+
+---
+
+### Import Path Cheat Sheet
+
+The path to `test/mocks/mocks.mocks.dart` depends on how deep your test file is:
+
+| Test file location | Import path |
+|---|---|
+| `test/widget/your_test.dart` | `'../mocks/mocks.mocks.dart'` |
+| `test/unit/*/your_test.dart` | `'../../mocks/mocks.mocks.dart'` |
+| `test/unit/*/*/your_test.dart` | `'../../../mocks/mocks.mocks.dart'` |
+| `test/unit/*/*/*/your_test.dart` | `'../../../../mocks/mocks.mocks.dart'` |
+
+> 💡 `../` means go up one directory level. Count your depth from `test/` and add that many `../`.
+
+---
+
+### Test Checklist — Adding Tests for a New Feature
+
+```
+☐ 1. Declare mock in test/mocks/mocks.dart (if new class)
+☐ 2. Run: flutter pub run build_runner build --delete-conflicting-outputs
+☐ 3. Create unit test for use case   (test/unit/domain/usecases/)
+☐ 4. Create unit test for controller (test/unit/presentation/controllers/)
+☐ 5. Create widget test for page     (test/widget/)
+☐ 6. Run: flutter test test/unit/ test/widget/
+☐ 7. All tests green ✅
+```
