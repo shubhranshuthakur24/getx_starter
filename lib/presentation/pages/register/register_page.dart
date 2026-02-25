@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:getx_starter/presentation/controllers/register_controller.dart';
 import 'package:getx_starter/presentation/widgets/app_input_field.dart';
 import 'package:getx_starter/presentation/widgets/primary_button.dart';
+import 'package:getx_starter/routes/app_routes.dart';
 
 class RegisterPage extends GetView<RegisterController> {
   const RegisterPage({super.key});
@@ -266,7 +267,7 @@ class RegisterPage extends GetView<RegisterController> {
                                 ),
                               ),
                               GestureDetector(
-                                onTap: () => Get.back(),
+                                onTap: () => Get.toNamed(AppRoutes.login),
                                 child: const Text(
                                   'Sign In',
                                   style: TextStyle(

@@ -1,3 +1,5 @@
+import 'dart:math' as Math;
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -7,79 +9,85 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(backgroundColor: Colors.blue, title: Text("Home")),
       body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFF0F0C29), Color(0xFF302B63), Color(0xFF24243E)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        child: SafeArea(
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  width: 80,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF7C6FCD), Color(0xFF4FACFE)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(24),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF7C6FCD).withAlpha(120),
-                        blurRadius: 28,
-                        offset: const Offset(0, 10),
+        color: Colors.green,
+        child: Padding(
+          padding: EdgeInsets.all(60),
+          child: Container(
+            color: Colors.purple,
+            child: Padding(
+              padding: EdgeInsets.all(50),
+              child: Container(
+                color: Colors.amber,
+                child: Padding(
+                  padding: EdgeInsets.all(30),
+                  child: Container(
+                    color: Colors.blue,
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          buildCircle(),
+                          buildCircle(),
+                          Container(
+                            margin: EdgeInsets.only(left: 20),
+                            height: 200,
+                            width: 100,
+                            child: Stack(
+                              children: [
+                                Positioned(
+                                  top: 0,
+                                  child: Transform.rotate(
+                                    angle: Math.pi,
+                                    child: buildCircle(),
+                                  ),
+                                ),
+                                Positioned(
+                                  top: 100, // move second one down
+                                  child: Transform.rotate(
+                                    angle: Math.pi,
+                                    child: buildCircle(),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                  child: const Icon(
-                    Icons.check_circle_rounded,
-                    size: 44,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 28),
-                const Text(
-                  '🎉 Login Successful!',
-                  style: TextStyle(
-                    fontSize: 26,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  'Firebase Auth is working correctly.',
-                  style: TextStyle(
-                    fontSize: 15,
-                    color: Colors.white.withAlpha(153),
-                  ),
-                ),
-                const SizedBox(height: 48),
-                TextButton.icon(
-                  onPressed: () => Get.offAllNamed('/login'),
-                  icon: const Icon(
-                    Icons.logout_rounded,
-                    color: Color(0xFFFF6B6B),
-                  ),
-                  label: const Text(
-                    'Sign Out',
-                    style: TextStyle(
-                      color: Color(0xFFFF6B6B),
-                      fontWeight: FontWeight.w600,
-                      fontSize: 15,
                     ),
                   ),
                 ),
-              ],
+              ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class buildCircle extends StatelessWidget {
+  const buildCircle({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Transform.rotate(
+      angle: 180 / Math.pi,
+      child: Container(
+        width: 80,
+        height: 80,
+        decoration: BoxDecoration(
+          color: Colors.purple,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.deepPurple.withAlpha(120),
+              spreadRadius: 4,
+              blurRadius: 15,
+              offset: Offset.fromDirection(1.0, 30),
+            ),
+          ],
+          borderRadius: BorderRadius.all(Radius.circular(200)),
         ),
       ),
     );
