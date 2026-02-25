@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:getx_starter/core/utils/app_logger.dart';
 import 'package:getx_starter/domain/usecases/login_usecase.dart';
 import 'package:getx_starter/routes/app_routes.dart';
 
@@ -7,6 +8,8 @@ class LoginController extends GetxController {
   final LoginUseCase loginUseCase;
 
   LoginController(this.loginUseCase);
+
+  static const _tag = 'LoginController';
 
   // Form key for validation
   final formKey = GlobalKey<FormState>();
@@ -21,7 +24,14 @@ class LoginController extends GetxController {
   final errorMessage = ''.obs;
 
   @override
+  void onInit() {
+    super.onInit();
+    AppLogger.info('LoginController initialised', tag: _tag);
+  }
+
+  @override
   void onClose() {
+    AppLogger.info('LoginController disposed', tag: _tag);
     emailController.dispose();
     passwordController.dispose();
     super.onClose();
@@ -29,14 +39,25 @@ class LoginController extends GetxController {
 
   void togglePasswordVisibility() {
     isPasswordHidden.value = !isPasswordHidden.value;
+    AppLogger.verbose(
+      'Password visibility toggled → hidden: ${isPasswordHidden.value}',
+      tag: _tag,
+    );
   }
 
   Future<void> login() async {
     // Clear previous error
     errorMessage.value = '';
 
-    if (!formKey.currentState!.validate()) return;
+    if (!formKey.currentState!.validate()) {
+      AppLogger.debug('Form validation failed — aborting login', tag: _tag);
+      return;
+    }
 
+    AppLogger.info(
+      'Login initiated for: ${emailController.text.trim()}',
+      tag: _tag,
+    );
     isLoading.value = true;
 
     final result = await loginUseCase(
@@ -46,19 +67,29 @@ class LoginController extends GetxController {
 
     isLoading.value = false;
 
-    result.fold((failure) => errorMessage.value = failure.message, (user) {
-      Get.snackbar(
-        'Welcome back!',
-        user.email ?? 'Logged in successfully',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.green.shade600,
-        colorText: Colors.white,
-        margin: const EdgeInsets.all(16),
-        borderRadius: 12,
-        duration: const Duration(seconds: 3),
-      );
-      Get.offAllNamed(AppRoutes.home);
-    });
+    result.fold(
+      (failure) {
+        AppLogger.warning('Login failed: ${failure.message}', tag: _tag);
+        errorMessage.value = failure.message;
+      },
+      (user) {
+        AppLogger.info(
+          'Login success → navigating to home (uid: ${user.uid})',
+          tag: _tag,
+        );
+        Get.snackbar(
+          'Welcome back!',
+          user.email ?? 'Logged in successfully',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green.shade600,
+          colorText: Colors.white,
+          margin: const EdgeInsets.all(16),
+          borderRadius: 12,
+          duration: const Duration(seconds: 3),
+        );
+        Get.offAllNamed(AppRoutes.home);
+      },
+    );
   }
 
   /// Validators

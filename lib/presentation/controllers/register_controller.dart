@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:getx_starter/core/utils/app_logger.dart';
 import 'package:getx_starter/domain/usecases/register_usecase.dart';
 import 'package:getx_starter/routes/app_routes.dart';
 
@@ -7,6 +8,8 @@ class RegisterController extends GetxController {
   final RegisterUseCase registerUseCase;
 
   RegisterController(this.registerUseCase);
+
+  static const _tag = 'RegisterController';
 
   // Form key
   final formKey = GlobalKey<FormState>();
@@ -24,7 +27,14 @@ class RegisterController extends GetxController {
   final errorMessage = ''.obs;
 
   @override
+  void onInit() {
+    super.onInit();
+    AppLogger.info('RegisterController initialised', tag: _tag);
+  }
+
+  @override
   void onClose() {
+    AppLogger.info('RegisterController disposed', tag: _tag);
     nameController.dispose();
     emailController.dispose();
     passwordController.dispose();
@@ -32,17 +42,37 @@ class RegisterController extends GetxController {
     super.onClose();
   }
 
-  void togglePasswordVisibility() =>
-      isPasswordHidden.value = !isPasswordHidden.value;
+  void togglePasswordVisibility() {
+    isPasswordHidden.value = !isPasswordHidden.value;
+    AppLogger.verbose(
+      'Password visibility toggled → hidden: ${isPasswordHidden.value}',
+      tag: _tag,
+    );
+  }
 
-  void toggleConfirmPasswordVisibility() =>
-      isConfirmPasswordHidden.value = !isConfirmPasswordHidden.value;
+  void toggleConfirmPasswordVisibility() {
+    isConfirmPasswordHidden.value = !isConfirmPasswordHidden.value;
+    AppLogger.verbose(
+      'Confirm password visibility toggled → hidden: ${isConfirmPasswordHidden.value}',
+      tag: _tag,
+    );
+  }
 
   Future<void> register() async {
     errorMessage.value = '';
 
-    if (!formKey.currentState!.validate()) return;
+    if (!formKey.currentState!.validate()) {
+      AppLogger.debug(
+        'Form validation failed — aborting registration',
+        tag: _tag,
+      );
+      return;
+    }
 
+    AppLogger.info(
+      'Registration initiated for: ${emailController.text.trim()}',
+      tag: _tag,
+    );
     isLoading.value = true;
 
     final result = await registerUseCase(
@@ -52,19 +82,29 @@ class RegisterController extends GetxController {
 
     isLoading.value = false;
 
-    result.fold((failure) => errorMessage.value = failure.message, (user) {
-      Get.snackbar(
-        'Account created!',
-        'Welcome, ${user.email ?? 'new user'}',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.green.shade600,
-        colorText: Colors.white,
-        margin: const EdgeInsets.all(16),
-        borderRadius: 12,
-        duration: const Duration(seconds: 3),
-      );
-      Get.offAllNamed(AppRoutes.home);
-    });
+    result.fold(
+      (failure) {
+        AppLogger.warning('Registration failed: ${failure.message}', tag: _tag);
+        errorMessage.value = failure.message;
+      },
+      (user) {
+        AppLogger.info(
+          'Registration success → navigating to home (uid: ${user.uid})',
+          tag: _tag,
+        );
+        Get.snackbar(
+          'Account created!',
+          'Welcome, ${user.email ?? 'new user'}',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green.shade600,
+          colorText: Colors.white,
+          margin: const EdgeInsets.all(16),
+          borderRadius: 12,
+          duration: const Duration(seconds: 3),
+        );
+        Get.offAllNamed(AppRoutes.home);
+      },
+    );
   }
 
   // ── Validators ──────────────────────────────────────────────────────────
