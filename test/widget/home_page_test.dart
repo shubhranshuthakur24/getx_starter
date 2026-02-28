@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:getx_starter/presentation/pages/home/home_page.dart';
+import 'package:getx_starter/presentation/widgets/build_circle.dart';
+import 'package:getx_starter/presentation/widgets/build_rectangle.dart';
 
 void main() {
   tearDown(() => Get.reset());
@@ -9,49 +11,33 @@ void main() {
   // ── Rendering ──────────────────────────────────────────────────────────────
 
   group('HomePage rendering', () {
-    testWidgets('renders success message', (tester) async {
+    testWidgets('renders AppBar with Home title', (tester) async {
       await tester.pumpWidget(const GetMaterialApp(home: HomePage()));
 
-      expect(find.text('🎉 Login Successful!'), findsOneWidget);
-      expect(find.text('Firebase Auth is working correctly.'), findsOneWidget);
+      expect(find.text('Home'), findsOneWidget);
+      expect(find.byType(AppBar), findsOneWidget);
     });
 
-    testWidgets('renders Sign Out button', (tester) async {
+    testWidgets('renders nested BuildRectangle containers', (tester) async {
       await tester.pumpWidget(const GetMaterialApp(home: HomePage()));
 
-      expect(find.text('Sign Out'), findsOneWidget);
-      expect(find.byIcon(Icons.logout_rounded), findsOneWidget);
+      // 3 nested BuildRectangles in the body
+      expect(find.byType(BuildRectangle), findsNWidgets(3));
     });
 
-    testWidgets('renders success icon', (tester) async {
+    testWidgets('renders InnerColumnWidget inside the nested containers', (
+      tester,
+    ) async {
       await tester.pumpWidget(const GetMaterialApp(home: HomePage()));
 
-      expect(find.byIcon(Icons.check_circle_rounded), findsOneWidget);
+      expect(find.byType(InnerColumnWidget), findsOneWidget);
     });
-  });
 
-  // ── Navigation ─────────────────────────────────────────────────────────────
+    testWidgets('renders BuildCircle inside InnerColumnWidget', (tester) async {
+      await tester.pumpWidget(const GetMaterialApp(home: HomePage()));
+      await tester.pump();
 
-  group('HomePage navigation', () {
-    testWidgets('Sign Out navigates to /login', (tester) async {
-      await tester.pumpWidget(
-        GetMaterialApp(
-          getPages: [
-            GetPage(name: '/home', page: () => const HomePage()),
-            GetPage(
-              name: '/login',
-              page: () => const Scaffold(body: Text('Login Page')),
-            ),
-          ],
-          initialRoute: '/home',
-        ),
-      );
-
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Sign Out'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Login Page'), findsOneWidget);
+      expect(find.byType(BuildCircle), findsWidgets);
     });
   });
 }
