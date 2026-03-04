@@ -1,9 +1,19 @@
 import 'package:get/get.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 import 'package:getx_starter/data/datasources/remote/auth_remote_datasource.dart';
 import 'package:getx_starter/data/repositories/auth_repository_impl.dart';
 import 'package:getx_starter/domain/repositories/auth_repository.dart';
 import 'package:getx_starter/domain/usecases/login_usecase.dart';
 import 'package:getx_starter/domain/usecases/register_usecase.dart';
+
+// Face imports
+import 'package:getx_starter/data/datasources/local/face_local_datasource.dart';
+import 'package:getx_starter/data/repositories/face_repository_impl.dart';
+import 'package:getx_starter/domain/repositories/face_repository.dart';
+import 'package:getx_starter/domain/usecases/generate_face_embedding_usecase.dart';
+import 'package:getx_starter/domain/usecases/verify_face_usecase.dart';
+import 'package:getx_starter/presentation/controllers/face_controller.dart';
 
 /// Registers all dependencies with GetX's service locator.
 /// Call [InjectionContainer.init()] once in main() before runApp().
@@ -29,6 +39,45 @@ class InjectionContainer {
 
     Get.lazyPut<RegisterUseCase>(
       () => RegisterUseCase(Get.find<AuthRepository>()),
+      fenix: true,
+    );
+
+    // ==============================
+    // FACE VERIFICATION MODULE
+    // ==============================
+
+    // Local Datasource
+    Get.lazyPut<FaceLocalDatasource>(
+      () => FaceLocalDatasourceImpl(),
+      fenix: true,
+    );
+
+    // Repository
+    Get.lazyPut<FaceRepository>(
+      () => FaceRepositoryImpl(
+        Get.find<FaceLocalDatasource>(),
+        FirebaseFirestore.instance,
+      ),
+      fenix: true,
+    );
+
+    // Usecases
+    Get.lazyPut<GenerateFaceEmbeddingUseCase>(
+      () => GenerateFaceEmbeddingUseCase(Get.find<FaceRepository>()),
+      fenix: true,
+    );
+
+    Get.lazyPut<VerifyFaceUseCase>(
+      () => VerifyFaceUseCase(Get.find<FaceRepository>()),
+      fenix: true,
+    );
+
+    // Controller
+    Get.lazyPut<FaceController>(
+      () => FaceController(
+        generateUsecase: Get.find<GenerateFaceEmbeddingUseCase>(),
+        verifyUsecase: Get.find<VerifyFaceUseCase>(),
+      ),
       fenix: true,
     );
   }

@@ -1,12 +1,12 @@
 import 'dart:io';
 import '../repositories/face_repository.dart';
 
-class GeneratedFaceEmbeddingUseCase {
+class GenerateFaceEmbeddingUseCase {
   final FaceRepository repository;
 
-  GeneratedFaceEmbeddingUseCase(this.repository);
+  GenerateFaceEmbeddingUseCase(this.repository);
 
   Future<List<double>> call(File image) {
-    return repository.generatedEmbedding(image);
+    return repository.generateEmbedding(image);
   }
 }
