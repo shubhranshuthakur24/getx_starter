@@ -1,8 +1,9 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:getx_starter/di/injection_container.dart';
-import 'package:getx_starter/firebase_options.dart';
+import 'package:getx_starter/core/di/injection_container.dart';
+import 'package:getx_starter/core/config/firebase_options.dart';
+import 'package:getx_starter/core/theme/app_theme.dart';
 import 'package:getx_starter/routes/app_pages.dart';
 import 'package:getx_starter/routes/app_routes.dart';
 
@@ -32,6 +33,9 @@ class StarterApp extends StatelessWidget {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'GetX Starter',
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      themeMode: ThemeMode.system,
       initialRoute: AppRoutes.login,
       getPages: AppPages.routes,
     );
