@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:getx_starter/core/errors/failures.dart';
 import 'package:getx_starter/core/utils/app_logger.dart';
 import 'package:getx_starter/features/auth/data/sources/remote/auth_remote_datasource.dart';
-import 'package:getx_starter/features/auth/domain/entites/user_entity.dart';
+import 'package:getx_starter/features/auth/domain/entities/user_entity.dart';
 import 'package:getx_starter/features/auth/domain/repos/auth_repository.dart';
 
 import '../model/user_model.dart';

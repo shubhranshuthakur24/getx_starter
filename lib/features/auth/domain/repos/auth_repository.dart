@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:getx_starter/core/errors/failures.dart';
-import 'package:getx_starter/features/auth/domain/entites/user_entity.dart';
+
+import '../entities/user_entity.dart';
 
 /// Abstract contract that the data layer must fulfil.
 abstract class AuthRepository {

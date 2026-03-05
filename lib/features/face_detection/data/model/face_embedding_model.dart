@@ -1,4 +1,4 @@
-import '../../domain/entites/face_embedding_entity.dart';
+import '../../domain/entities/face_embedding_entity.dart';
 
 class FaceEmbeddingModel extends FaceEmbeddingEntity {
   FaceEmbeddingModel(List<double> vector) : super(vector);
