@@ -8,12 +8,12 @@ import 'dart:async' as _i5;
 import 'package:dartz/dartz.dart' as _i2;
 import 'package:firebase_auth/firebase_auth.dart' as _i3;
 import 'package:getx_starter/core/errors/failures.dart' as _i6;
-import 'package:getx_starter/data/datasources/remote/auth_remote_datasource.dart'
+import 'package:getx_starter/features/auth/data/sources/remote/auth_remote_datasource.dart'
     as _i8;
-import 'package:getx_starter/domain/entities/user_entity.dart' as _i7;
-import 'package:getx_starter/domain/repositories/auth_repository.dart' as _i4;
-import 'package:getx_starter/domain/usecases/login_usecase.dart' as _i9;
-import 'package:getx_starter/domain/usecases/register_usecase.dart' as _i10;
+import 'package:getx_starter/features/auth/domain/entites/user_entity.dart' as _i7;
+import 'package:getx_starter/features/auth/domain/repos/auth_repository.dart' as _i4;
+import 'package:getx_starter/features/auth/domain/usecases/login_usecase.dart' as _i9;
+import 'package:getx_starter/features/auth/domain/usecases/register_usecase.dart' as _i10;
 import 'package:mockito/mockito.dart' as _i1;
 import 'package:mockito/src/dummies.dart' as _i11;
 

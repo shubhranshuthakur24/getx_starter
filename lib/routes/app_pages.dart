@@ -1,10 +1,11 @@
 import 'package:get/get.dart';
-import 'package:getx_starter/presentation/bindings/login_binding.dart';
-import 'package:getx_starter/presentation/bindings/register_binding.dart';
-import 'package:getx_starter/presentation/pages/home/home_page.dart';
-import 'package:getx_starter/presentation/pages/login/login_page.dart';
-import 'package:getx_starter/presentation/pages/register/register_page.dart';
+import 'package:getx_starter/features/auth/presentation/bindings/login_binding.dart';
+import 'package:getx_starter/features/auth/presentation/views/login/login_page.dart';
 import 'package:getx_starter/routes/app_routes.dart';
+
+import '../features/auth/presentation/bindings/register_binding.dart';
+import '../features/auth/presentation/views/signup/register_page.dart';
+
 
 class AppPages {
   static final routes = [
@@ -18,6 +19,6 @@ class AppPages {
       page: () => const RegisterPage(),
       binding: RegisterBinding(),
     ),
-    GetPage(name: AppRoutes.home, page: () => const HomePage()),
+
   ];
 }

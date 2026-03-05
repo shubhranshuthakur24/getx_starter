@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:getx_starter/presentation/pages/home/home_page.dart';
-import 'package:getx_starter/presentation/widgets/build_circle.dart';
-import 'package:getx_starter/presentation/widgets/build_rectangle.dart';
+import 'package:getx_starter/features/auth/widgets/build_circle.dart';
+import 'package:getx_starter/features/auth/presentation/views/widgets/build_rectangle.dart';
 
 void main() {
   tearDown(() => Get.reset());

@@ -3,10 +3,10 @@
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mockito/annotations.dart';
-import 'package:getx_starter/data/datasources/remote/auth_remote_datasource.dart';
-import 'package:getx_starter/domain/repositories/auth_repository.dart';
-import 'package:getx_starter/domain/usecases/login_usecase.dart';
-import 'package:getx_starter/domain/usecases/register_usecase.dart';
+import 'package:getx_starter/features/auth/data/sources/remote/auth_remote_datasource.dart';
+import 'package:getx_starter/features/auth/domain/repos/auth_repository.dart';
+import 'package:getx_starter/features/auth/domain/usecases/login_usecase.dart';
+import 'package:getx_starter/features/auth/domain/usecases/register_usecase.dart';
 
 @GenerateMocks([
   AuthRepository,

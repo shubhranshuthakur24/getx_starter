@@ -2,8 +2,8 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:getx_starter/core/errors/failures.dart';
-import 'package:getx_starter/domain/entities/user_entity.dart';
-import 'package:getx_starter/domain/usecases/login_usecase.dart';
+import 'package:getx_starter/features/auth/domain/entites/user_entity.dart';
+import 'package:getx_starter/features/auth/domain/usecases/login_usecase.dart';
 
 import '../../../mocks/mocks.mocks.dart';
 

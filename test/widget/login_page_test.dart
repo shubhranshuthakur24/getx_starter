@@ -7,9 +7,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:mockito/mockito.dart';
 import 'package:getx_starter/core/errors/failures.dart';
-import 'package:getx_starter/domain/entities/user_entity.dart';
-import 'package:getx_starter/presentation/controllers/login_controller.dart';
-import 'package:getx_starter/presentation/pages/login/login_page.dart';
+import 'package:getx_starter/features/auth/domain/entites/user_entity.dart';
+import 'package:getx_starter/features/login/presentation/controllers/login_controller.dart';
+import 'package:getx_starter/features/auth/presentation/views/login/login_page.dart';
 
 import '../mocks/mocks.mocks.dart';
 

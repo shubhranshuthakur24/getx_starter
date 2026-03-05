@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:mockito/mockito.dart';
-import 'package:getx_starter/presentation/controllers/register_controller.dart';
+import 'package:getx_starter/features/auth/login/presentation/controllers/register_controller.dart';
 
 import '../../../mocks/mocks.mocks.dart';
 
