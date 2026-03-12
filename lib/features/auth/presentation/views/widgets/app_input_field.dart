@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class AppInputField extends StatelessWidget {
+class AppInputField extends StatefulWidget {
   final String label;
   final String hint;
   final TextEditingController controller;
@@ -25,12 +25,31 @@ class AppInputField extends StatelessWidget {
   });
 
   @override
+  State<AppInputField> createState() => _AppInputFieldState();
+}
+
+class _AppInputFieldState extends State<AppInputField> {
+  late final FocusNode _focusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode = FocusNode();
+  }
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          label,
+          widget.label,
           style: Theme.of(context).textTheme.labelLarge?.copyWith(
             color: Colors.white70,
             fontWeight: FontWeight.w600,
@@ -39,17 +58,18 @@ class AppInputField extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         TextFormField(
-          controller: controller,
-          validator: validator,
-          keyboardType: keyboardType,
-          obscureText: obscureText,
-          textInputAction: textInputAction,
-          onFieldSubmitted: onFieldSubmitted,
+          controller: widget.controller,
+          focusNode: _focusNode,
+          validator: widget.validator,
+          keyboardType: widget.keyboardType,
+          obscureText: widget.obscureText,
+          textInputAction: widget.textInputAction,
+          onFieldSubmitted: widget.onFieldSubmitted,
           style: const TextStyle(color: Colors.white),
           decoration: InputDecoration(
-            hintText: hint,
+            hintText: widget.hint,
             hintStyle: TextStyle(color: Colors.white.withAlpha(102)),
-            suffixIcon: suffixIcon,
+            suffixIcon: widget.suffixIcon,
             filled: true,
             fillColor: Colors.white.withAlpha(20),
             contentPadding: const EdgeInsets.symmetric(
